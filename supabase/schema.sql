@@ -479,3 +479,53 @@ CREATE POLICY "Admin Full Storage Access"
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+-- ==============================================================================
+-- 6. PHASE 3 ROLE-BASED POLICIES (§13)
+-- ==============================================================================
+
+-- Profiles: users read and update their own row; admin full access
+DROP POLICY IF EXISTS profiles_select_own_or_admin ON public.profiles;
+CREATE POLICY profiles_select_own_or_admin ON public.profiles
+  FOR SELECT TO authenticated
+  USING (id = auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS profiles_update_own_or_admin ON public.profiles;
+CREATE POLICY profiles_update_own_or_admin ON public.profiles
+  FOR UPDATE TO authenticated
+  USING (id = auth.uid() OR public.is_admin())
+  WITH CHECK (id = auth.uid() OR public.is_admin());
+
+-- Doctors: public read approved; doctor owner can read & update own; admin full access
+DROP POLICY IF EXISTS doctors_select_policy ON public.doctors;
+CREATE POLICY doctors_select_policy ON public.doctors
+  FOR SELECT
+  USING (status = 'approved' OR profile_id = auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS doctors_update_own_or_admin ON public.doctors;
+CREATE POLICY doctors_update_own_or_admin ON public.doctors
+  FOR UPDATE TO authenticated
+  USING (profile_id = auth.uid() OR public.is_admin())
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS doctors_insert_own_or_admin ON public.doctors;
+CREATE POLICY doctors_insert_own_or_admin ON public.doctors
+  FOR INSERT TO authenticated
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+
+-- Hospitals: public read approved; hospital owner can read & update own; admin full access
+DROP POLICY IF EXISTS hospitals_select_policy ON public.hospitals;
+CREATE POLICY hospitals_select_policy ON public.hospitals
+  FOR SELECT
+  USING (status = 'approved' OR profile_id = auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS hospitals_update_own_or_admin ON public.hospitals;
+CREATE POLICY hospitals_update_own_or_admin ON public.hospitals
+  FOR UPDATE TO authenticated
+  USING (profile_id = auth.uid() OR public.is_admin())
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS hospitals_insert_own_or_admin ON public.hospitals;
+CREATE POLICY hospitals_insert_own_or_admin ON public.hospitals
+  FOR INSERT TO authenticated
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+

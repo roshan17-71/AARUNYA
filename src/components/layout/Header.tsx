@@ -1,14 +1,31 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, ChevronDown, Plane, ShieldCheck, HeartPulse } from 'lucide-react';
+import { Menu, ChevronDown, Plane, ShieldCheck, HeartPulse, User, LogOut } from 'lucide-react';
 import { Container } from './Container';
 import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { MobileNav } from './MobileNav';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Header: React.FC = () => {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isTravelOpen, setIsTravelOpen] = useState(false);
   const location = useLocation();
+  const { user, profile, role, signOut } = useAuth();
+
+  const getDashboardUrl = () => {
+    switch (role) {
+      case 'doctor':
+        return '/dashboard/doctor';
+      case 'hospital':
+        return '/dashboard/hospital';
+      case 'admin':
+        return '/admin';
+      case 'patient':
+      default:
+        return '/dashboard/patient';
+    }
+  };
 
   const navLinks = [
     { label: 'Treatments', href: '/treatments' },
@@ -122,16 +139,42 @@ export const Header: React.FC = () => {
 
             {/* Right Actions */}
             <div className="hidden sm:flex items-center gap-3">
-              <Link to="/signin">
-                <Button variant="ghost" size="sm">
-                  Sign In
-                </Button>
-              </Link>
-              <Link to="/signup/patient">
-                <Button variant="primary" size="sm">
-                  Get Started
-                </Button>
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Link to={getDashboardUrl()}>
+                    <Button variant="secondary" size="sm">
+                      <User className="w-3.5 h-3.5 mr-1" />
+                      <span>{profile?.full_name?.split(' ')[0] || 'Dashboard'}</span>
+                      {role && (
+                        <Badge variant="primary" size="sm" className="ml-1.5 capitalize text-[10px]">
+                          {role}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => signOut()}
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4 text-neutral-muted hover:text-neutral-text" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/signin">
+                    <Button variant="ghost" size="sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/signup/patient">
+                    <Button variant="primary" size="sm">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Hamburger */}
