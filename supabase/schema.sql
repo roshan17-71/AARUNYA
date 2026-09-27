@@ -529,3 +529,31 @@ CREATE POLICY hospitals_insert_own_or_admin ON public.hospitals
   FOR INSERT TO authenticated
   WITH CHECK (profile_id = auth.uid() OR public.is_admin());
 
+-- ==============================================================================
+-- 7. PHASE 4 POLICIES (PUBLIC SHELL & INQUIRIES)
+-- ==============================================================================
+
+-- Treatments: public read where is_published = true
+DROP POLICY IF EXISTS treatments_public_read ON public.treatments;
+CREATE POLICY treatments_public_read ON public.treatments
+  FOR SELECT
+  USING (is_published = TRUE OR public.is_admin());
+
+-- Patient Stories: public read where is_published = true
+DROP POLICY IF EXISTS patient_stories_public_read ON public.patient_stories;
+CREATE POLICY patient_stories_public_read ON public.patient_stories
+  FOR SELECT
+  USING (is_published = TRUE OR public.is_admin());
+
+-- Advisor Requests: allow public/guest submission
+DROP POLICY IF EXISTS advisor_requests_insert_public ON public.advisor_requests;
+CREATE POLICY advisor_requests_insert_public ON public.advisor_requests
+  FOR INSERT
+  WITH CHECK (TRUE);
+
+-- Advisor Requests: view restricted to owner or admin
+DROP POLICY IF EXISTS advisor_requests_select_policy ON public.advisor_requests;
+CREATE POLICY advisor_requests_select_policy ON public.advisor_requests
+  FOR SELECT TO authenticated
+  USING (patient_id = auth.uid() OR public.is_admin());
+

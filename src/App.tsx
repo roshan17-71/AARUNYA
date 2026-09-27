@@ -12,6 +12,12 @@ import { SignInPage } from './pages/SignInPage';
 import { SignUpPatientPage } from './pages/SignUpPatientPage';
 import { SignUpDoctorPage } from './pages/SignUpDoctorPage';
 import { SignUpHospitalPage } from './pages/SignUpHospitalPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { MedicalDisclaimerPage } from './pages/MedicalDisclaimerPage';
 
 // Authenticated Dashboard Shells
 import { PatientDashboardPage } from './pages/PatientDashboardPage';
@@ -36,6 +42,12 @@ export const App = () => {
             <Route path="/signup/doctor" element={<SignUpDoctorPage />} />
             <Route path="/signup/hospital" element={<SignUpHospitalPage />} />
             <Route path="/dev/style-guide" element={<StyleGuidePage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/medical-disclaimer" element={<MedicalDisclaimerPage />} />
 
             {/* Placeholders for future phases */}
             <Route path="/treatments" element={<Navigate to="/dev/style-guide" replace />} />
