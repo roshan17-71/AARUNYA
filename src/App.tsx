@@ -18,6 +18,8 @@ import { ContactPage } from './pages/ContactPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { MedicalDisclaimerPage } from './pages/MedicalDisclaimerPage';
+import { TreatmentsPage } from './pages/TreatmentsPage';
+import { TreatmentDetailPage } from './pages/TreatmentDetailPage';
 
 // Authenticated Dashboard Shells
 import { PatientDashboardPage } from './pages/PatientDashboardPage';
@@ -49,8 +51,11 @@ export const App = () => {
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/medical-disclaimer" element={<MedicalDisclaimerPage />} />
 
+            {/* Treatments Module (Phase 5) */}
+            <Route path="/treatments" element={<TreatmentsPage />} />
+            <Route path="/treatments/:slug" element={<TreatmentDetailPage />} />
+
             {/* Placeholders for future phases */}
-            <Route path="/treatments" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/hospitals" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/doctors" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/packages" element={<Navigate to="/dev/style-guide" replace />} />
