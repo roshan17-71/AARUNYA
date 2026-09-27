@@ -20,6 +20,8 @@ import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { MedicalDisclaimerPage } from './pages/MedicalDisclaimerPage';
 import { TreatmentsPage } from './pages/TreatmentsPage';
 import { TreatmentDetailPage } from './pages/TreatmentDetailPage';
+import { HospitalsPage } from './pages/HospitalsPage';
+import { HospitalDetailPage } from './pages/HospitalDetailPage';
 
 // Authenticated Dashboard Shells
 import { PatientDashboardPage } from './pages/PatientDashboardPage';
@@ -55,8 +57,11 @@ export const App = () => {
             <Route path="/treatments" element={<TreatmentsPage />} />
             <Route path="/treatments/:slug" element={<TreatmentDetailPage />} />
 
+            {/* Hospitals Module (Phase 6) */}
+            <Route path="/hospitals" element={<HospitalsPage />} />
+            <Route path="/hospitals/:slug" element={<HospitalDetailPage />} />
+
             {/* Placeholders for future phases */}
-            <Route path="/hospitals" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/doctors" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/packages" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/video-consultation" element={<Navigate to="/dev/style-guide" replace />} />

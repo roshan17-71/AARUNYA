@@ -774,3 +774,73 @@ ON CONFLICT (slug) DO UPDATE SET
   image_url = EXCLUDED.image_url,
   is_published = EXCLUDED.is_published,
   updated_at = NOW();
+
+
+-- ============================================================================
+-- 11. PHASE 6: Hospitals & Packages Policies and Seed Dataset
+-- ============================================================================
+
+ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS hospitals_public_read ON public.hospitals;
+CREATE POLICY hospitals_public_read ON public.hospitals
+  FOR SELECT
+  USING (status = 'approved' OR public.is_admin());
+
+DROP POLICY IF EXISTS hospitals_owner_select ON public.hospitals;
+CREATE POLICY hospitals_owner_select ON public.hospitals
+  FOR SELECT TO authenticated
+  USING (profile_id = auth.uid());
+
+DROP POLICY IF EXISTS hospitals_owner_insert ON public.hospitals;
+CREATE POLICY hospitals_owner_insert ON public.hospitals
+  FOR INSERT TO authenticated
+  WITH CHECK (profile_id = auth.uid());
+
+DROP POLICY IF EXISTS hospitals_owner_update ON public.hospitals;
+CREATE POLICY hospitals_owner_update ON public.hospitals
+  FOR UPDATE TO authenticated
+  USING (profile_id = auth.uid() OR public.is_admin())
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+
+ALTER TABLE public.packages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS packages_public_read ON public.packages;
+CREATE POLICY packages_public_read ON public.packages
+  FOR SELECT
+  USING (
+    (status = 'published' AND EXISTS (
+      SELECT 1 FROM public.hospitals h
+      WHERE h.id = packages.hospital_id AND h.status = 'approved'
+    ))
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS packages_hospital_manage ON public.packages;
+CREATE POLICY packages_hospital_manage ON public.packages
+  FOR ALL TO authenticated
+  USING (
+    hospital_id IN (
+      SELECT id FROM public.hospitals WHERE profile_id = auth.uid()
+    )
+    OR public.is_admin()
+  )
+  WITH CHECK (
+    hospital_id IN (
+      SELECT id FROM public.hospitals WHERE profile_id = auth.uid()
+    )
+    OR public.is_admin()
+  );
+
+ALTER TABLE public.treatment_hospitals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS treatment_hospitals_public_read ON public.treatment_hospitals;
+CREATE POLICY treatment_hospitals_public_read ON public.treatment_hospitals
+  FOR SELECT
+  USING (TRUE);
+
+DROP POLICY IF EXISTS treatment_hospitals_admin_manage ON public.treatment_hospitals;
+CREATE POLICY treatment_hospitals_admin_manage ON public.treatment_hospitals
+  FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
