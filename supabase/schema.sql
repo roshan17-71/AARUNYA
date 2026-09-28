@@ -844,3 +844,60 @@ CREATE POLICY treatment_hospitals_admin_manage ON public.treatment_hospitals
   FOR ALL TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
+
+
+-- ============================================================================
+-- 12. PHASE 7: Doctors & Consultation Slots Policies
+-- ============================================================================
+
+ALTER TABLE public.doctors ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS doctors_public_read ON public.doctors;
+CREATE POLICY doctors_public_read ON public.doctors
+  FOR SELECT
+  USING (status = 'approved' OR public.is_admin());
+
+DROP POLICY IF EXISTS doctors_owner_select ON public.doctors;
+CREATE POLICY doctors_owner_select ON public.doctors
+  FOR SELECT TO authenticated
+  USING (profile_id = auth.uid());
+
+DROP POLICY IF EXISTS doctors_owner_insert ON public.doctors;
+CREATE POLICY doctors_owner_insert ON public.doctors
+  FOR INSERT TO authenticated
+  WITH CHECK (profile_id = auth.uid());
+
+DROP POLICY IF EXISTS doctors_owner_update ON public.doctors;
+CREATE POLICY doctors_owner_update ON public.doctors
+  FOR UPDATE TO authenticated
+  USING (profile_id = auth.uid() OR public.is_admin())
+  WITH CHECK (profile_id = auth.uid() OR public.is_admin());
+
+ALTER TABLE public.consultation_slots ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS consultation_slots_public_read ON public.consultation_slots;
+CREATE POLICY consultation_slots_public_read ON public.consultation_slots
+  FOR SELECT
+  USING (
+    (is_booked = FALSE AND EXISTS (
+      SELECT 1 FROM public.doctors d
+      WHERE d.id = consultation_slots.doctor_id AND d.status = 'approved'
+    ))
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS consultation_slots_doctor_manage ON public.consultation_slots;
+CREATE POLICY consultation_slots_doctor_manage ON public.consultation_slots
+  FOR ALL TO authenticated
+  USING (
+    doctor_id IN (
+      SELECT id FROM public.doctors WHERE profile_id = auth.uid()
+    )
+    OR public.is_admin()
+  )
+  WITH CHECK (
+    doctor_id IN (
+      SELECT id FROM public.doctors WHERE profile_id = auth.uid()
+    )
+    OR public.is_admin()
+  );

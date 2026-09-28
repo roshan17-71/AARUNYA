@@ -22,6 +22,8 @@ import { TreatmentsPage } from './pages/TreatmentsPage';
 import { TreatmentDetailPage } from './pages/TreatmentDetailPage';
 import { HospitalsPage } from './pages/HospitalsPage';
 import { HospitalDetailPage } from './pages/HospitalDetailPage';
+import { DoctorsPage } from './pages/DoctorsPage';
+import { DoctorProfilePage } from './pages/DoctorProfilePage';
 
 // Authenticated Dashboard Shells
 import { PatientDashboardPage } from './pages/PatientDashboardPage';
@@ -61,8 +63,11 @@ export const App = () => {
             <Route path="/hospitals" element={<HospitalsPage />} />
             <Route path="/hospitals/:slug" element={<HospitalDetailPage />} />
 
+            {/* Doctors Module (Phase 7) */}
+            <Route path="/doctors" element={<DoctorsPage />} />
+            <Route path="/doctors/:id" element={<DoctorProfilePage />} />
+
             {/* Placeholders for future phases */}
-            <Route path="/doctors" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/packages" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/video-consultation" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/second-opinion" element={<Navigate to="/dev/style-guide" replace />} />
