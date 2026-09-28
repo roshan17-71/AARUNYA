@@ -25,6 +25,8 @@ import { HospitalDetailPage } from './pages/HospitalDetailPage';
 import { DoctorsPage } from './pages/DoctorsPage';
 import { DoctorProfilePage } from './pages/DoctorProfilePage';
 import { VideoConsultationPage } from './pages/VideoConsultationPage';
+import { SecondOpinionPage } from './pages/SecondOpinionPage';
+import { SecondOpinionRequestPage } from './pages/SecondOpinionRequestPage';
 
 // Authenticated Dashboard Shells
 import { PatientDashboardPage } from './pages/PatientDashboardPage';
@@ -71,9 +73,12 @@ export const App = () => {
             {/* Video Consultation (Phase 8) */}
             <Route path="/video-consultation" element={<VideoConsultationPage />} />
 
+            {/* Second Medical Opinion (Phase 9) */}
+            <Route path="/second-opinion" element={<SecondOpinionPage />} />
+            <Route path="/second-opinion/request" element={<SecondOpinionRequestPage />} />
+
             {/* Placeholders for future phases */}
             <Route path="/packages" element={<Navigate to="/dev/style-guide" replace />} />
-            <Route path="/second-opinion" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/patient-stories" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/travel" element={<Navigate to="/dev/style-guide" replace />} />
             <Route path="/flights" element={<Navigate to="/dev/style-guide" replace />} />
