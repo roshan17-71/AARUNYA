@@ -221,7 +221,7 @@ export const DoctorProfilePage = () => {
                 </div>
               )}
 
-              <Link to="/contact" className="block pt-1">
+              <Link to={`/video-consultation?doctorId=${doctor.id}`} className="block pt-1">
                 <Button variant="primary" size="sm" className="w-full justify-center">
                   <Video className="w-3.5 h-3.5 mr-1.5" />
                   <span>Book Consultation</span>
@@ -302,7 +302,7 @@ export const DoctorProfilePage = () => {
                             </span>
                           </div>
 
-                          <Link to="/contact">
+                          <Link to={`/video-consultation?doctorId=${doctor.id}`}>
                             <Button variant="outline" size="sm" className="text-xs">
                               Select Slot
                             </Button>

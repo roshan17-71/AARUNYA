@@ -901,3 +901,104 @@ CREATE POLICY consultation_slots_doctor_manage ON public.consultation_slots
     )
     OR public.is_admin()
   );
+
+
+-- ============================================================================
+-- 13. PHASE 8: Consultations Policies & Atomic Booking RPC
+-- ============================================================================
+
+ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS consultations_patient_select ON public.consultations;
+CREATE POLICY consultations_patient_select ON public.consultations
+  FOR SELECT TO authenticated
+  USING (patient_id = auth.uid());
+
+DROP POLICY IF EXISTS consultations_patient_insert ON public.consultations;
+CREATE POLICY consultations_patient_insert ON public.consultations
+  FOR INSERT TO authenticated
+  WITH CHECK (patient_id = auth.uid());
+
+DROP POLICY IF EXISTS consultations_doctor_select ON public.consultations;
+CREATE POLICY consultations_doctor_select ON public.consultations
+  FOR SELECT TO authenticated
+  USING (
+    doctor_id IN (
+      SELECT id FROM public.doctors WHERE profile_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS consultations_doctor_update ON public.consultations;
+CREATE POLICY consultations_doctor_update ON public.consultations
+  FOR UPDATE TO authenticated
+  USING (
+    doctor_id IN (
+      SELECT id FROM public.doctors WHERE profile_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    doctor_id IN (
+      SELECT id FROM public.doctors WHERE profile_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS consultations_admin_all ON public.consultations;
+CREATE POLICY consultations_admin_all ON public.consultations
+  FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+CREATE OR REPLACE FUNCTION public.book_consultation(
+  p_doctor_id UUID,
+  p_slot_id UUID,
+  p_patient_id UUID,
+  p_patient_notes TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_slot_booked BOOLEAN;
+  v_consultation RECORD;
+BEGIN
+  SELECT is_booked INTO v_slot_booked
+  FROM public.consultation_slots
+  WHERE id = p_slot_id AND doctor_id = p_doctor_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Consultation slot does not exist or does not match doctor.';
+  END IF;
+
+  IF v_slot_booked THEN
+    RAISE EXCEPTION 'This consultation slot has already been booked by another patient.';
+  END IF;
+
+  UPDATE public.consultation_slots
+  SET is_booked = TRUE
+  WHERE id = p_slot_id;
+
+  INSERT INTO public.consultations (
+    doctor_id,
+    slot_id,
+    patient_id,
+    patient_notes,
+    status,
+    payment_status
+  )
+  VALUES (
+    p_doctor_id,
+    p_slot_id,
+    p_patient_id,
+    p_patient_notes,
+    'requested',
+    'unpaid'
+  )
+  RETURNING * INTO v_consultation;
+
+  RETURN to_jsonb(v_consultation);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.book_consultation(UUID, UUID, UUID, TEXT) TO authenticated, service_role;
